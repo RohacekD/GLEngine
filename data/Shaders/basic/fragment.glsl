@@ -3,6 +3,10 @@
 
 #include "../include/frameConstants.glsl"
 
+@struct Material;
+
+uniform Material mat;
+
 //per mesh
 uniform vec3 modelColor;
 uniform sampler2D colorMap;

@@ -3,11 +3,6 @@
 #include <Physics/Primitives/Shapes.h>
 #include <Physics/Primitives/AABB.h>
 
-#include <vector>
-#include <string>
-#include <memory>
-
-
 namespace GLEngine::Renderer::MeshData {
 
 //=================================================================================
@@ -18,12 +13,11 @@ struct Material
 	glm::vec4 specular;
 	float shininess;
 
+	std::string m_Name;
+
 	//Index to a texture array
 	//If negative - material has no texture
 	int textureIndex;
-
-	//Alignment to 128bit, in terms of size
-	float aligmetVariableDoNotUse1, aligmetVariableDoNotUse2;
 };
 
 //=================================================================================

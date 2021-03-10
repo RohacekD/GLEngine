@@ -2,6 +2,7 @@
 
 #include <GLRenderer/Components/StaticMesh.h>
 
+#include <GLRenderer/Buffers/UniformBuffersManager.h>
 #include <GLRenderer/Mesh/StaticMeshResource.h>
 #include <GLRenderer/Shaders/ShaderManager.h>
 #include <GLRenderer/Shaders/ShaderProgram.h>
@@ -33,6 +34,7 @@ C_StaticMesh::C_StaticMesh(std::string meshFile, std::string_view shader, std::s
 	, m_meshFile(meshFile)
 	, m_Mesh(nullptr)
 {
+	m_Material = Buffers::C_UniformBuffersManager::Instance().CreateUniformBuffer<C_MaterialBuffer>("material");
 	// @todo lazy init
 	auto sl = std::make_unique<Renderer::Mesh::SceneLoader>();
 
@@ -70,6 +72,7 @@ C_StaticMesh::C_StaticMesh(std::string meshFile, std::string_view shader, std::s
 C_StaticMesh::C_StaticMesh(const Renderer::MeshData::Mesh& mesh, std::string_view shader, std::shared_ptr<Entity::I_Entity> owner)
 	: Renderer::I_RenderableComponent(owner)
 {
+	//m_Material = Buffers::C_UniformBuffersManager::Instance().CreateUniformBuffer<C_MaterialBuffer>("material");
 	m_Mesh = std::make_shared<Mesh::C_StaticMeshResource>(mesh);
 	m_AABB = mesh.bbox;
 
@@ -100,6 +103,21 @@ void C_StaticMesh::PerformDraw() const
 	}
 
 	auto& tm = Textures::C_TextureUnitManger::Instance();
+
+	//m_RoughnessMap->MakeHandleResident(true);
+	//m_ColorMap->MakeHandleResident(true);
+	//m_NormalMap->MakeHandleResident(true);
+
+	renderer->AddCommand(
+		std::move(
+			std::make_unique<Commands::HACK::C_LambdaCommand>(
+				[&]() {
+					//m_Material->UploadData();
+					//m_Material->Activate(true);
+				}, "material upload"
+			)
+		)
+	);
 
 	if (m_RoughnessMap) {
 		tm.BindTextureToUnit(*m_RoughnessMap, 0);
@@ -147,6 +165,10 @@ void C_StaticMesh::PerformDraw() const
 			std::make_unique<Commands::HACK::C_DrawStaticMesh>(m_Mesh)
 		)
 	);
+
+	// m_RoughnessMap->MakeHandleResident(false);
+	// m_ColorMap->MakeHandleResident(false);
+	// m_NormalMap->MakeHandleResident(false);
 }
 
 //=================================================================================
@@ -159,6 +181,26 @@ void C_StaticMesh::DebugDrawGUI()
 			m_Roughness.Draw();
 		}
 	}
+
+	auto& tmgr = Textures::C_TextureManager::Instance();
+
+	//m_Material->m_Material.m_diffuse = glm::vec4(m_Color.GetValue(), 0.0f);
+	//m_Material->m_Material.m_Roughness = m_Roughness.GetValue();
+	//
+	//if (m_RoughnessMap)
+	//	m_Material->m_Material.m_RougnessMap = m_RoughnessMap->GetHandle();
+	//else
+	//	m_Material->m_Material.m_RougnessMap = tmgr.GetIdentityTexture()->GetHandle();
+	//
+	//if (m_ColorMap)
+	//	m_Material->m_Material.m_AlbedoMap = m_ColorMap->GetHandle();
+	//else
+	//	m_Material->m_Material.m_AlbedoMap = tmgr.GetIdentityTexture()->GetHandle();
+	//
+	//if (m_NormalMap)
+	//	m_Material->m_Material.m_NormalMap = m_NormalMap->GetHandle();
+	//else
+	//	m_Material->m_Material.m_NormalMap = tmgr.GetIdentityTexture()->GetHandle();
 }
 
 //=================================================================================

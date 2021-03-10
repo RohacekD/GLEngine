@@ -70,8 +70,12 @@ void ModelLoader::_loadMaterialsFromAiscene(const aiScene* loadedScene, std::sha
 	for (unsigned int i = 0; i < loadedScene->mNumMaterials; ++i)
 	{
 		Renderer::MeshData::Material m;
-		_getMaterialColorAttributes(loadedScene->mMaterials[i], m);
-		const std::string texName = _getMaterialDiffuseTextureName(loadedScene->mMaterials[i]);
+		const auto aiMat = loadedScene->mMaterials[i];
+		_getMaterialColorAttributes(aiMat, m);
+		aiString matName;
+		aiMat->Get(AI_MATKEY_NAME, matName);
+		m.m_Name = std::string(matName.C_Str());
+		const std::string texName = _getMaterialDiffuseTextureName(aiMat);
 		m.textureIndex = _getTextureIndexAndAddToRegister(texName, textureRegister);
 		scene->materials.push_back(m);
 	}
